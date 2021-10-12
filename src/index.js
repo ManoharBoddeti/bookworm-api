@@ -1,17 +1,26 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import express from "express";
+import path from "path";
+import mongoose from "mongoose";
+import bodyParser from "body-parser";
+import dotenv from "dotenv";
+import Promise from "bluebird";
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+import auth from "./routes/auth";
+import users from "./routes/users";
+import books from "./routes/books";
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+dotenv.config();
+const app = express();
+app.use(express.json());
+mongoose.Promise = Promise;
+mongoose.connect('mongodb://localhost/bookworm', { useMongoClient: true });
+
+app.use("/api/auth", auth);
+app.use("/api/users", users);
+app.use("/api/books", books);
+
+app.get("/*", (req, res) => {
+  res.sendFile(path.join(__dirname, "index.html"));
+});
+
+app.listen(8080, () => console.log("Running on localhost:8080"));
